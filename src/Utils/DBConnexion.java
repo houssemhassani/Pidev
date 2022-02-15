@@ -5,35 +5,35 @@
  */
 package Utils;
 
+import Entities.demande;
+import Entities.notification;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-
-
 /**
  *
- * @author Asus
+ * @author hamza
  */
 public class DBConnexion {
+
     
-       private static Connection connexion;
-       
-       public DBConnexion(){
-           
-       
-       }
-       
-       public static Connection getConnexion()
-       {
-           try {
-                DBConnexion.connexion=DriverManager.getConnection("jdbc:mysql://localhost:3306/pidev","root",null);
-                System.out.println(DBConnexion.connexion.toString());
-           } catch (SQLException ex) {
-               System.err.println(ex.getMessage());
-           }
-           return DBConnexion.connexion;
-       }
+    public static Connection connecterDB(){
+        try{
+        Class.forName("com.mysql.jdbc.Driver");
+        System.out.println("Driver ok");
+        String url ="jdbc:mysql://localhost:3306/pidev";
+        String user ="root";
+        String password="";
+        Connection cnx = DriverManager.getConnection(url,user,password);
+        System.out.println("Connexion bien établie");
+        return cnx;
         
         
-    
+        
+                
+        }catch(Exception e){
+        e.printStackTrace();
+        return null;
+        }
+    }
 }
