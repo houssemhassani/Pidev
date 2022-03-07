@@ -13,17 +13,17 @@ public class Publication {
     private int id;
     private String status;
     private String photo;
+    private int citoyen_id;
+    private int employee_id;
     private String utilisateur_nom;
-    private String utilisateur_prenom;
     private boolean confirm_publication; 
 
     public Publication() {
     }
 
-    public Publication( String status, String photo, String utilisateur_nom, String utilisateur_prenom) {
+    public Publication( String status, String photo, String utilisateur_nom) {
         this.status = status;
         this.photo = photo;
-        this.utilisateur_prenom = utilisateur_prenom;
         this.utilisateur_nom = utilisateur_nom;
         this.confirm_publication = false;
     }
@@ -54,13 +54,7 @@ public class Publication {
         this.photo = photo;
     }
 
-    public String getUtilisateur_prenom() {
-        return utilisateur_prenom;
-    }
-
-    public void setUtilisateur_prenom(String utilisateur_prenom) {
-        this.utilisateur_prenom = utilisateur_prenom;
-    }
+    
 
    
     public String getUtilisateur_nom() {
@@ -79,10 +73,36 @@ public class Publication {
         this.confirm_publication = confirm_publication;
     }
 
+    public int getCitoyen_id() {
+        return citoyen_id;
+    }
+
+    public void setCitoyen_id(int citoyen_id) {
+        this.citoyen_id = citoyen_id;
+    }
+
+    public int getEmployee_id() {
+        return employee_id;
+    }
+
+    public void setEmployee_id(int employee_id) {
+        this.employee_id = employee_id;
+    }
+
     @Override
     public String toString() {
-        return "Publication{" + "id=" + id + ", status=" + status + ", photo=" + photo + ", utilisateur_nom=" + utilisateur_nom + ", utilisateur_prenom=" + utilisateur_prenom + ", confirm_publication=" + confirm_publication + '}';
+        return "Publication{" + "status=" + status + ", photo=" + photo + ", utilisateur_nom=" + utilisateur_nom + ", confirm_publication=" + confirm_publication + '}';
     }
+
+    public Object toURI() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public String getAbsolutePath() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    
 
     
     

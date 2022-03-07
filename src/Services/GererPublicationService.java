@@ -21,19 +21,21 @@ public class GererPublicationService {
     private static Connection cnx=DBConnexion.getConnexion();
 
     public GererPublicationService() {
-    }
+    } 
     
-    public static void ajouterPublication(String status,String photo,String utilisateur_nom,String utilisateur_prenom)
+    public static void ajouterPublication(Publication p)
     {
         
          ResultSet resultat;
          PreparedStatement insert;
          try {
-            insert=cnx.prepareStatement("insert into publication (status,photo,utilisateur_nom,utilisateur_prenom) values(?,?,?,?)");
-            insert.setString(1, status);
-            insert.setString(2, photo);
-            insert.setString(3, utilisateur_nom);
-            insert.setString(4, utilisateur_prenom);
+            insert=cnx.prepareStatement("insert into publication (status,photo,confirm_publication,id_citoyen) values(?,?,?,?)");
+            insert.setString(1, p.getStatus());
+            insert.setBoolean(3, false);
+            insert.setString(2,p.getPhoto());
+            insert.setInt(4,p.getCitoyen_id());
+           // insert.setInt(3,p.getCitoyen_id() );
+           // insert.setBoolean(4, false);
             insert.executeUpdate();
              System.out.println("publication ajoutee");
         } catch (SQLException e) {
@@ -67,17 +69,17 @@ public class GererPublicationService {
     
     
     
-    public static void modifierPhotoPublication(int id,String photo)
+    public  void modifierPhotoPublication(Publication p)
     {
         PreparedStatement select;
         PreparedStatement update;
         ResultSet resultat;
         try {
-            select=cnx.prepareStatement("select * from publication where id ="+id);
+            select=cnx.prepareStatement("select * from publication where id ="+p.getId());
             resultat=select.executeQuery();
             if(resultat.isBeforeFirst())
             {
-                update=cnx.prepareStatement("update publication set photo='"+photo+"'");
+                update=cnx.prepareStatement("update publication set status='"+p.getStatus()+"' where id="+p.getId());
                 update.executeUpdate();
                 System.out.println("photo modifiee");
             }
@@ -88,9 +90,31 @@ public class GererPublicationService {
             System.err.println(e.getMessage());
         }
     }
-    public static void supprimerPublication(int id)
+     public  void ConfirmerPublication(Publication p)
+    {
+        PreparedStatement select;
+        PreparedStatement update;
+        ResultSet resultat;
+        try {
+            select=cnx.prepareStatement("select * from publication where id ="+p.getId());
+            resultat=select.executeQuery();
+            if(resultat.isBeforeFirst())
+            {
+                update=cnx.prepareStatement("update publication set confirm_publication="+true+" where id="+p.getId());
+                update.executeUpdate();
+                System.out.println("photo modifiee");
+            }
+            else
+                System.err.println("publication introuvable");
+            
+        } catch (SQLException e) {
+            System.err.println(e.getMessage());
+        }
+    }
+    public  void supprimerPublication(int id)
     {
         PreparedStatement  delete;
+        PreparedStatement  delete2;
         PreparedStatement select;
         ResultSet resultat;
         try {
@@ -98,7 +122,11 @@ public class GererPublicationService {
             resultat=select.executeQuery();
             if(resultat.isBeforeFirst())
             {
+                delete2=cnx.prepareStatement("delete from commantaire where id_publication="+id);
+                delete2.executeUpdate();
                 delete=cnx.prepareStatement("delete from publication where id="+id);
+                
+                
                 delete.executeUpdate();
                 System.out.println("publication supprimeeeee");
             }
@@ -108,24 +136,37 @@ public class GererPublicationService {
             System.err.println(e.getMessage());
         }
     }
-    public static ArrayList<Publication>  getPublicationsConfirmee()
+    public  ArrayList<Publication>  getPublicationsConfirmee()
     {
         PreparedStatement select;
+        PreparedStatement select2;
+        ResultSet resultat2;
         ResultSet resultat;
         ArrayList<Publication> pubs=new ArrayList<Publication>();
         try {
-            select=cnx.prepareStatement("select * from publication where confirm_publication=?");
+            select=cnx.prepareStatement("select * from publication inner join citoyen on publication.id_citoyen=citoyen.id    where publication.confirm_publication=?");
+            select2=cnx.prepareStatement("select * from publication inner join employee on publication.id_employee=employee.id    where publication.confirm_publication=?");
             select.setBoolean(1, true);
+            select2.setBoolean(1, true );
             resultat=select.executeQuery();
+            resultat2=select2.executeQuery();
             while(resultat.next())
             {
                 Publication pub=new Publication();
                 pub.setId(resultat.getInt("id"));
                 pub.setStatus(resultat.getString("status"));
                 pub.setPhoto(resultat.getString("photo"));
-                pub.setUtilisateur_nom("utilisateur_nom");
-                pub.setUtilisateur_prenom("utilisateur_prenom");
-                pub.setConfirm_publication(true);
+                pub.setUtilisateur_nom(resultat.getString("nom")+" "+resultat.getString("prenom")); 
+                pubs.add(pub);
+                
+            }
+             while(resultat2.next())
+            {
+                Publication pub=new Publication();
+              
+                pub.setStatus(resultat2.getString("status"));
+                pub.setPhoto(resultat2.getString("photo"));
+                pub.setUtilisateur_nom(resultat2.getString("nom")+" "+resultat2.getString("prenom")); 
                 pubs.add(pub);
                 
             }
@@ -136,31 +177,78 @@ public class GererPublicationService {
         }
          return pubs;
     }
-    public static ArrayList<Publication> getPublicationsNonConfirmee()
+    public  ArrayList<Publication>  getPublications()
     {
         PreparedStatement select;
+        PreparedStatement select2;
+        ResultSet resultat2;
         ResultSet resultat;
         ArrayList<Publication> pubs=new ArrayList<Publication>();
         try {
-            select=cnx.prepareStatement("select * from publication where confirm_publication=?");
-            select.setBoolean(1, false);
+            select=cnx.prepareStatement("select * from publication where publication.confirm_publication=?");
+            //select2=cnx.prepareStatement("select * from publication inner join employee on publication.id_employee=employee.id    where publication.confirm_publication=?");
+            select.setBoolean(1, true);
+            //select2.setBoolean(1, true );
             resultat=select.executeQuery();
+            //resultat2=select2.executeQuery();
             while(resultat.next())
             {
                 Publication pub=new Publication();
                 pub.setId(resultat.getInt("id"));
                 pub.setStatus(resultat.getString("status"));
                 pub.setPhoto(resultat.getString("photo"));
-                pub.setUtilisateur_nom("utilisateur_nom");
-                pub.setUtilisateur_prenom("utilisateur_prenom");
-                pub.setConfirm_publication(false);
+               // pub.setUtilisateur_nom(resultat.getString("nom")+" "+resultat.getString("prenom")); 
                 pubs.add(pub);
                 
             }
+            /* while(resultat2.next())
+            {
+                Publication pub=new Publication();
+              
+                pub.setStatus(resultat2.getString("status"));
+                pub.setPhoto(resultat2.getString("photo"));
+                pub.setUtilisateur_nom(resultat2.getString("nom")+" "+resultat2.getString("prenom")); 
+                pubs.add(pub);
+                
+            }*/
            
             
         } catch (SQLException e) {
             return null;
+        }
+         return pubs;
+    }
+    public  ArrayList<Publication> getPublicationsNonConfirmee()
+    {
+        PreparedStatement select;
+        PreparedStatement select2;
+        ResultSet resultat;
+        ResultSet resultat2;
+        ArrayList<Publication> pubs=new ArrayList<Publication>();
+        try {
+            select=cnx.prepareStatement("select * from publication inner join citoyen on publication.id_citoyen=citoyen.id    where publication.confirm_publication=?");
+           // select2=cnx.prepareStatement("select * from publication inner join employee on publication.id_employee=employee.id    where publication.confirm_publication=?");
+            select.setBoolean(1, false);
+           // select2.setBoolean(1, false);
+            resultat=select.executeQuery();
+          //  resultat2=select2.executeQuery();
+            while(resultat.next())
+            {
+                Publication pub=new Publication();
+                pub.setId(resultat.getInt("id"));
+                pub.setStatus(resultat.getString("status"));
+                pub.setPhoto(resultat.getString("photo"));
+                pub.setUtilisateur_nom(resultat.getString("nom")+" "+resultat.getString("prenom")); 
+                pubs.add(pub);
+                
+                
+            }
+            
+           
+            
+        } catch (SQLException e) {
+            return pubs;
+            
         }
          return pubs;
         
